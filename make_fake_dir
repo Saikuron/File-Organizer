@@ -1,0 +1,17 @@
+#!/bin/bash
+
+mkdir test
+cd test
+mkdir depth1
+cd depth1
+mkdir depth2
+mkdir depth2bis
+cd depth2
+touch test1
+touch test2
+cd ..
+cd depth2bis
+touch test3
+touch test4
+cd ../..
+touch test5
