@@ -112,11 +112,6 @@ int main(int ac, char* argv[]) {
         fprintf(stderr, "Error with the options, you have to choose only one among -a -t and -d");
         exit(1);
     }
-    
-    /*else if ( op_alpha + op_type + op_date == 0)
-    {
-        printf("If you want to move your files you have to indicate an option among -a -t and -d");
-    }*/
 
     //get path to current directory
     if (getcwd(pt, sizeof(pt)) != NULL) {
@@ -125,6 +120,7 @@ int main(int ac, char* argv[]) {
         perror("getcwd() error");
     }
     do_struct(".");
+    // print();
 
     // arguments' options
     if (op_rmdir == 1) {
@@ -160,16 +156,19 @@ void rebDirCont(char dirname[]) {
     }
     else {
         chdir(dirname);
-        while ((direntp = readdir(dir_ptr)) != NULL) {  // While there are remaining files
+        // While there are remaining files
+        while ((direntp = readdir(dir_ptr)) != NULL) {  
             // Check if the file is a directory, if it is a directory, then rebDirCont on it
-            if (checkDir(direntp->d_name) == 1 && strcmp(direntp->d_name, "..") != 0 && strcmp(direntp->d_name, ".") != 0) {
+            if (checkDir(direntp->d_name) == 1 && strcmp(direntp->d_name, "..") != 0 &&
+                strcmp(direntp->d_name, ".") != 0) {
                 //printf("%s\n", direntp->d_name);
                 deepness++;
                 rebDirCont(direntp->d_name);
                 //printf("Suppress : %s\n", direntp->d_name);
                 rmdir(direntp->d_name);
             }
-            else if (strcmp(direntp->d_name, "..") != 0 && strcmp(direntp->d_name, ".") != 0) {
+            else if (strcmp(direntp->d_name, "..") != 0 &&
+                     strcmp(direntp->d_name, ".") != 0) {
                 // rename the file with initial path + filename, use the pwd function that we made on week 4
                 //if( strcmp(temp_path, initial_path) == 0)
                 if (deepness == 0) {
@@ -262,6 +261,7 @@ void getPathToS(ino_t this_inode) {
     ino_t my_inode;
     //static int i=0;
     char its_name[BUFSIZ];
+
     bzero(temp_path, strlen(temp_path));
     if (get_inode("..") != this_inode) {
         chdir("..");                            // Up one dir
@@ -311,7 +311,10 @@ void alpha_group(const char* s2) {
         if (d1[z].ino == 0) {
             break;
         }
-        if ((strcmp(d1[z].filename, "..") == 0) || (strcmp(d1[z].filename, ".") == 0) || (strcmp(d1[z].filename, PROGRAMNAME) == 0) || (strcmp(d1[z].filename, PROGRAMNAMEC) == 0)) {
+        if ((strcmp(d1[z].filename, "..") == 0) ||
+            (strcmp(d1[z].filename, ".") == 0) ||
+            (strcmp(d1[z].filename, PROGRAMNAME) == 0) ||
+            (strcmp(d1[z].filename, PROGRAMNAMEC) == 0)) {
             //don't move file
         }
         else {
@@ -350,7 +353,10 @@ void date_group(const char* s2) {
         if (d1[z].ino == 0) {
             break;
         }
-        if ((strcmp(d1[z].filename, "..") == 0) || (strcmp(d1[z].filename, ".") == 0) || (strcmp(d1[z].filename, PROGRAMNAME) == 0) || (strcmp(d1[z].filename, PROGRAMNAMEC) == 0)) {
+        if ((strcmp(d1[z].filename, "..") == 0) ||
+            (strcmp(d1[z].filename, ".") == 0) ||
+            (strcmp(d1[z].filename, PROGRAMNAME) == 0) ||
+            (strcmp(d1[z].filename, PROGRAMNAMEC) == 0)) {
             //don't move file
         }
         else {

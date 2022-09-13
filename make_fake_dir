@@ -1,7 +1,7 @@
 #!/bin/bash
 
-mkdir test
-cd test
+mkdir test_dir
+cd test_dir
 mkdir depth1
 cd depth1
 mkdir depth2
