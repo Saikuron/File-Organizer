@@ -33,7 +33,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-//for deletion:
+// for deletion:
 void rebDirCont(char[]);
 int checkDir(char*);
 void getPathTo(ino_t);
@@ -46,8 +46,9 @@ char temp_path[256];
 char oldpath[256];
 char newpath[256];
 
-//for grouping
+// for grouping
 void do_struct(char[]);
+void print_dirent(struct dirent*);
 void dostat(char*, int i);
 void get_file_info(char*, struct stat*, int i);
 void mode_to_letters(int, char[]);
@@ -61,8 +62,8 @@ char* merge_path(const char* s1, const char* s2);
 void move_file(char* source, const char* dest, const char* s2);
 
 #define SIZE 70
-#define PROGRAMNAME "fileorg"
-#define PROGRAMNAMEC "fileorg.c"
+#define PROGRAMNAME "main"
+#define PROGRAMNAMEC "main.c"
 
 struct filestruct {
     char mode[11];
@@ -109,18 +110,16 @@ int main(int ac, char* argv[]) {
     }
 
     if (op_alpha + op_type + op_date > 1) {
-        fprintf(stderr, "Error with the options, you have to choose only one among -a -t and -d");
+        fprintf(stderr, "Error with the options, you have to choose only one "
+                        "among -a -t and -d");
         exit(1);
     }
 
-    //get path to current directory
-    if (getcwd(pt, sizeof(pt)) != NULL) {
-    }
-    else {
-        perror("getcwd() error");
+    // Get path to current working directory
+    if (getcwd(pt, sizeof(pt)) == NULL) {
+        perror("Error: getcwd() - Couldn't get current working directory");
     }
     do_struct(".");
-    // print();
 
     // arguments' options
     if (op_rmdir == 1) {
@@ -158,8 +157,10 @@ void rebDirCont(char dirname[]) {
         chdir(dirname);
         // While there are remaining files
         while ((direntp = readdir(dir_ptr)) != NULL) {  
-            // Check if the file is a directory, if it is a directory, then rebDirCont on it
-            if (checkDir(direntp->d_name) == 1 && strcmp(direntp->d_name, "..") != 0 &&
+            // Check if the file is a directory, if it is a directory, then 
+            // rebDirCont on it
+            if (checkDir(direntp->d_name) == 1 &&
+                strcmp(direntp->d_name, "..") != 0 &&
                 strcmp(direntp->d_name, ".") != 0) {
                 //printf("%s\n", direntp->d_name);
                 deepness++;
@@ -169,7 +170,8 @@ void rebDirCont(char dirname[]) {
             }
             else if (strcmp(direntp->d_name, "..") != 0 &&
                      strcmp(direntp->d_name, ".") != 0) {
-                // rename the file with initial path + filename, use the pwd function that we made on week 4
+                // rename the file with initial path + filename, use the pwd 
+                // function that we made on week 4
                 //if( strcmp(temp_path, initial_path) == 0)
                 if (deepness == 0) {
                     continue;
@@ -337,11 +339,13 @@ void alpha_group(const char* s2) {
                 printf("File renamed successfully.\n");
             }
             else {
-                printf("Unable to rename files. Please check files exist and you have permissions to modify files.\n");
+                printf("Unable to rename files. Please check files exist and "
+                       "you have permissions to modify files.\n");
             }
         }
     }
 }
+
 
 void date_group(const char* s2) {
     //protect OUR program, don't move yourself!
@@ -392,11 +396,13 @@ void date_group(const char* s2) {
                 printf("File renamed successfully.\n");
             }
             else {
-                printf("Unable to rename files. Please check files exist and you have permissions to modify files.\n");
+                printf("Unable to rename files. Please check files exist and "
+                       "you have permissions to modify files.\n");
             }
         }//end else
     }
 }
+
 
 void type_group(const char* s2) {
     //protect OUR program, don't move yourself!
@@ -407,7 +413,10 @@ void type_group(const char* s2) {
         if (d1[z].ino == 0) {
             break;
         }
-        if ((strcmp(d1[z].filename, "..") == 0) || (strcmp(d1[z].filename, ".") == 0) || (strcmp(d1[z].filename, PROGRAMNAME) == 0) || (strcmp(d1[z].filename, PROGRAMNAMEC) == 0)) {
+        if ((strcmp(d1[z].filename, "..") == 0) ||
+            (strcmp(d1[z].filename, ".") == 0) ||
+            (strcmp(d1[z].filename, PROGRAMNAME) == 0) ||
+            (strcmp(d1[z].filename, PROGRAMNAMEC) == 0)) {
             //don't move file
         }
         else {
@@ -440,7 +449,8 @@ void type_group(const char* s2) {
                     printf("File renamed successfully.\n");
                 }
                 else {
-                    printf("Unable to rename files. Please check files exist and you have permissions to modify files.\n");
+                    printf("Unable to rename files. Please check files exist and "
+                           "you have permissions to modify files.\n");
                 }
             }
             else {
@@ -460,7 +470,8 @@ void type_group(const char* s2) {
                     printf("File renamed successfully.\n");
                 }
                 else {
-                    printf("Unable to rename files. Please check files exist and you have permissions to modify files.\n");
+                    printf("Unable to rename files. Please check files exist and "
+                           "you have permissions to modify files.\n");
                 }
             }
         } //end else
@@ -481,22 +492,33 @@ void do_struct(char dirname[]) {
     struct dirent* direntp;
     int i = 0;
 
+    // Open directory with name dirname
     if ((dir_ptr = opendir(dirname)) == NULL) {
         fprintf(stderr, "ls1: cannot open %s\n", dirname);
     }
     else {
+        // If dirname is not current directory, cd to it
         if (strcmp(dirname, ".") != 0) {
             chdir(dirname);
         }
+        // Go through each entry of the directory
         while ((direntp = readdir(dir_ptr)) != NULL) {
+            // print_dirent(direntp);              // Debug
             dostat(direntp->d_name, i);
             i++;
         }
         closedir(dir_ptr);
+        // Go back to original directory if cd was done
         if (strcmp(dirname, ".") != 0) {
             chdir("..");
         }
     }
+}
+
+
+// Debug function to print the content of a dirent struct
+void print_dirent(struct dirent* direntp) {
+    printf("%s - %d - %d\n", direntp->d_name, direntp->d_ino, direntp->d_reclen);
 }
 
 
@@ -512,6 +534,7 @@ void dostat(char* filename, int i) {
 }
 
 
+// Copies file information to d1
 void get_file_info(char* filename, struct stat* info_p, int i) {
     char modestr[11];
 
@@ -546,10 +569,12 @@ void mode_to_letters(int mode, char str[]) {
 }
 
 
+// Get user id and return it
 char* uid_to_name(uid_t uid) {
     struct passwd* getpwuid(), * pw_ptr;
     static char numstr[10];
 
+    // Get user id
     if ((pw_ptr = getpwuid(uid)) == NULL) {
         sprintf(numstr, "%d", uid);
         return numstr;
@@ -559,6 +584,8 @@ char* uid_to_name(uid_t uid) {
     }
 }
 
+
+// Get group id and return it
 char* gid_to_name(gid_t gid) {
     struct group* getgrid(), * grp_ptr;
     static char numstr[10];
@@ -571,4 +598,3 @@ char* gid_to_name(gid_t gid) {
         return grp_ptr->gr_name;
     }
 }
-
